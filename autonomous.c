@@ -62,7 +62,7 @@ void pre_auton() {
 		if (lastScene != scene) {
 			clear();
 		}
-		
+
 		if (scene == "voltage") {
 			displayLCDCenteredString(0, "Voltage (mV):");
 			displayLCDNumber(1, 0, voltage);
@@ -150,13 +150,14 @@ void pre_auton() {
 			displayLCDCenteredString(1, "to match scenes");
 		}
 		lastScene = scene;
-		
+
 	}
 
 	stopDrive();
 	resetSensors();
 
 	bLCDBacklight = false;
+
 }
 
 
@@ -181,7 +182,7 @@ void moveForward(float ticks, int speed) {
 }
 
 void turnRight(int degrees, int speed) {
-	int ticks = degrees * 55 / 20;
+	int ticks = degrees * 51 / 20;
 
 	SensorValue[encoderright] = 0;
 
@@ -197,7 +198,7 @@ void turnRight(int degrees, int speed) {
 }
 
 void turnLeft (int degrees, int speed) {
-	int ticks = degrees * 51 / 20;
+	int ticks = degrees * 5 / 2;
 
 	SensorValue[encoderleft] = 0;
 
@@ -226,6 +227,7 @@ void arm(bool direction, long time) {
 		motor[armleft] = 0;
 		motor[armright] = 0;
 	}
+
 	pause();
 }
 
@@ -251,6 +253,9 @@ int b = SensorValue[encoderright];
 
 task usercontrol() {
 	while (0==0) {
+		angle = SensorValue[pot];
+		a = SensorValue[encoderleft];
+		b = SensorValue[encoderright];
 		//Driving with Joysticks
 		motor[frontleft] = vexRT[Ch3];
 		motor[backleft] = vexRT[Ch3];
@@ -300,13 +305,13 @@ task usercontrol() {
 		} else {
 			motor[shooter] = 0;
 		}
-    
+
 		if (vexRT[Btn7L] == 1 && vexRT[Btn7R] == 0) {
 			turnLeft(90, 60);
 		} else if (vexRT[Btn7R] == 1 && vexRT[Btn7L] == 0) {
 			turnRight(90, 60);
 		} else {
-    
+
 		}
 	}
 }
