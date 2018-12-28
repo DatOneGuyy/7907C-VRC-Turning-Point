@@ -1,7 +1,7 @@
-#pragma config(Sensor, in1,    pot,            sensorNone)
-#pragma config(Sensor, in2,    gyro,           sensorNone)
-#pragma config(Sensor, dgtl5,  encoderleft,    sensorQuadEncoder)
-#pragma config(Sensor, dgtl7,  encoderright,   sensorQuadEncoder)
+#pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
+#pragma config(Sensor, in1,    pot,            sensorPotentiometer)
+#pragma config(Sensor, dgtl5,  encoderright,   sensorQuadEncoder)
+#pragma config(Sensor, dgtl7,  encoderleft,    sensorQuadEncoder)
 #pragma config(Motor,  port2,           frontleft,     tmotorVex393_MC29, openLoop, driveLeft)
 #pragma config(Motor,  port3,           frontright,    tmotorVex393_MC29, openLoop, reversed, driveRight)
 #pragma config(Motor,  port4,           backleft,      tmotorVex393_MC29, openLoop, driveLeft)
@@ -33,24 +33,46 @@ void pre_auton() {
 	SensorValue[encoderright] = 0;
 
 }
-
-void moveForward(float rotations, int speed) {
+int l;
+void moveForward(int clicks, int speed) {
 	SensorValue[encoderleft] = 0;
 	SensorValue[encoderright] = 0;
-
-	while (abs(SensorValue[encoderleft]) < rotations * 360) {
-		motor[frontleft] = speed;
-		motor[frontright] = speed;
-		motor[backleft] = speed;
-		motor[backright] = speed;
+	
+	float kp = 0.15;
+	float ki = 0.23;
+	
+	int rightpower = speed;
+	int leftpower;
+	
+	int error = 0;
+	int prevError = 0;
+	int integral = 0;
+	
+	while (SensorValue[encoderright] < clicks) {
+		datalogDataGroupStart();
+		datalogAddValue(1, error);
+		datalogAddValue(2, integral);
+		datalogAddValue(3, derivative);
+		datalogDataGroupEnd();
+		error = SensorValue[encoderright] - abs(SensorValue[encoderleft]);
+		integral += error;
+		
+		leftpower = rightpower + (error * kp) + (integral * ki);
+		motor[frontleft] = leftpower;
+		motor[frontright] = rightpower;
+		motor[backleft] = leftpower;
+		motor[backright] = rightpower;
+		
+		prevError = error;
+		wait1Msec(15);
+		
+		errorValue = error;
+		integralValue = integral;
+		derivativeValue = derivative;
 	}
-
-	motor[frontleft] = 0;
-	motor[frontright] = 0;
-	motor[backleft] = 0;
-	motor[backright] = 0;
-
-	wait1Msec(100);
+	
+	rightpower = 0;
+	leftpower = 0;
 }
 
 void turnRight(int degrees, int speed) {
@@ -117,71 +139,8 @@ void flip(long time) {
 
 
 task autonomous () {
-/*
-	arm(true, 200);
-	moveForward(1800, -127);
-	moveForward(1700, 127);
-	turnLeft(1250,127);
-	moveForward(1350, 127);
-	moveForward(250, -127);
-	turnRight(1150, 127);
-	moveForward(1350, 127);
-	moveForward(10, -50);
- //work on this autonomous for long term
-	*/
-/*
-	arm(true, 200);
-	moveForward(2000, -127);
-	moveForward(2400, 127);
-	turnLeft(1100, 127);
-	moveForward(1900, 127);
-*/
- //red
- //competition autonomous red
-
-//hello dad
-/*
-	arm(true, 700);
-	moveForward(2000, -127);
-	moveForward(2300, 127);
-	turnLeft(950, 127);
-	moveForward(2700, 127);
-	*/
-	//competition autonomous bluezer
-	/*
-	moveForward(2000, -127);
-	moveForward(800, 127);
-	turnLeft(1100, 127);
-	moveForward(1300, 127);
-	turnLeft(1100, -127);
-	moveForward(900, -127);
-	moveForward(600, 127);
-	turnLeft(1100, 127);
-	moveForward(1400, 127);
-	turnLeft(950, -127);
-	moveForward(900, -127);
-	moveForward(600,127);
-	turnLeft(1100, 127);
-	moveForward(400, 127);
-	turnRight(900, 127);
-	moveForward(1600, 127);
-	turnRight(900, 127);
-	moveForward(5000, 127);
-	*/
-/*
-	moveForward(1500, 127);
-	moveForward(400, -127);
-	*/
-	 //backup farther from suqare
-	//moveForward(1.7, -127);
-	//moveForward(0.3, 127);
-	turnRight(0.5, 127);
-	//moveForward(1.5, 127);
+	moveForward(600, 100);
 }
-
-int angle = SensorValue[pot];
-int a = SensorValue[encoderleft];
-int b = SensorValue[encoderright];
 
 task usercontrol() {
 	while (0==0) {
@@ -236,6 +195,15 @@ task usercontrol() {
 			motor[shooter] = -127;
 		} else {
 			motor[shooter] = 0;
+		}
+		
+		if (vexRT[Btn7U] == 1) {
+			moveForward(900, 90);
+		} else if (vexRT[Btn7D] == 1) {
+			motor[frontleft] = 0;
+			motor[frontright] = 0;
+			motor[backleft] = 0;
+			motor[backright] = 0;
 		}
 	}
 }
