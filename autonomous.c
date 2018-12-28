@@ -25,6 +25,12 @@ void stopDrive() {
 	motor[backright] = 0;
 }
 
+void resetSensors() {
+	SensorValue[encoderleft] = 0;
+	SensorValue[encoderright] = 0;
+	SensorValue[gyro] = 0;
+}
+
 void pause() {
 	wait1Msec(100);
 }
@@ -32,17 +38,10 @@ void pause() {
 void pre_auton() {
 	bStopTasksBetweenModes = true;
 
-	motor[frontleft] = 0;
-	motor[frontright] = 0;
-	motor[backleft] = 0;
-	motor[backright] = 0;
-	motor[armleft] = 0;
-	motor[armright] = 0;
-	motor[claw] = 0;
-
-	SensorValue[encoderleft] = 0;
-	SensorValue[encoderright] = 0;
-
+	stopDrive();
+	resetSensors();
+	
+	
 }
 
 
