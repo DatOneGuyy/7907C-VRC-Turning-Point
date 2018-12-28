@@ -132,15 +132,8 @@ task autonomous () {
 	moveForward(1400, -127);
 }
 
-int angle = SensorValue[pot];
-int a = SensorValue[encoderleft];
-int b = SensorValue[encoderright];
-
 task usercontrol() {
 	while (0==0) {
-		angle = SensorValue[pot];
-		a = SensorValue[encoderleft];
-		b = SensorValue[encoderright];
 		//Driving with Joysticks
 		motor[frontleft] = vexRT[Ch3];
 		motor[backleft] = vexRT[Ch3];
