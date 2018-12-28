@@ -20,6 +20,10 @@
 
 #pragma systemFile
 
+int selectedAutonomousColor; //1 is red, 2 is blue, 0 is none
+int selectedAutonomousSquare; //1 is close, 2 is far, 0 none
+bool skills;
+
 void stopDrive() {
 	motor[frontleft] = 0;
 	motor[frontright] = 0;
@@ -33,6 +37,11 @@ void resetSensors() {
 	SensorValue[gyro] = 0;
 }
 
+void clear() {
+	clearLCDLine(0);
+	clearLCDLine(1);
+}
+
 void pause() {
 	wait1Msec(100);
 }
@@ -40,8 +49,114 @@ void pause() {
 void pre_auton() {
 	bStopTasksBetweenModes = true;
 
+	clear();
+
+	bLCDBacklight = true;
+
+	string scene = "voltage";
+	float voltage = nAvgBatteryLevel;
+	string str = "";
+	string lastScene = "";
+
+	while (bIfiRobotDisabled) {
+		if (lastScene != scene) {
+			clear();
+		}
+		
+		if (scene == "voltage") {
+			displayLCDCenteredString(0, "Voltage (mV):");
+			displayLCDNumber(1, 0, voltage);
+			if (nLCDButtons != 0) {
+				scene = "colorSelection";
+				wait1Msec(500);
+			}
+		} else if (scene == "colorSelection") {
+			displayLCDCenteredString(0, "1: RED, 2: BLUE");
+			displayLCDCenteredString(1, "3: SKILLS/NONE");
+			if (nLCDButtons == 1) {
+				scene = "redSelection";
+				selectedAutonomousColor = 1;
+				wait1Msec(500);
+			} else if (nLCDButtons == 2) {
+				scene = "blueSelection";
+				selectedAutonomousColor = 2;
+				wait1Msec(500);
+			} else if (nLCDButtons == 4) {
+				scene = "other";
+				wait1Msec(500);
+			}
+		} else if (scene == "redSelection") {
+			displayLCDCenteredString(0, "1: FLAG SIDE");
+			displayLCDCenteredString(1, "2: OTHER SIDE");
+			if (nLCDButtons == 1) {
+				scene = "finished";
+				selectedAutonomousSquare = 1;
+				wait1Msec(500);
+			} else if (nLCDButtons == 2) {
+				scene = "finished";
+				selectedAutonomousSquare = 2;
+			}
+		} else if (scene == "blueSelection") {
+			displayLCDCenteredString(0, "1: FLAG SIDE");
+			displayLCDCenteredString(1, "2: OTHER SIDE");
+			if (nLCDButtons == 1) {
+				scene = "finished";
+				selectedAutonomousSquare = 1;
+				wait1Msec(500);
+			} else if (nLCDButtons == 2) {
+				scene = "finished";
+				selectedAutonomousSquare = 2;
+			}
+		} else if (scene == "finished") {
+			if (selectedAutonomousColor == 1) {
+				if (selectedAutonomousSquare == 1) {
+					displayLCDCenteredString(0, "Selected Auton:");
+					displayLCDCenteredString(1, "RED, CLOSE SIDE");
+				} else {
+					displayLCDCenteredString(0, "Selected Auton:");
+					displayLCDCenteredString(1, "RED, FAR SIDE");
+				}
+			} else if (selectedAutonomousColor == 2) {
+				if (selectedAutonomousSquare == 1) {
+					displayLCDCenteredString(0, "Selected Auton:");
+					displayLCDCenteredString(1, "BLUE, CLOSE SIDE");
+				} else {
+					displayLCDCenteredString(0, "Selected Auton:");
+					displayLCDCenteredString(1, "BLUE, FAR SIDE");
+				}
+			} else if (selectedAutonomousColor == 0 && selectedAutonomousSquare == 0) {
+				displayLCDCenteredString(0, "Selected auton:");
+				displayLCDCenteredString(1, "NONE");
+			} else {
+				displayLCDCenteredString(0, "Selected auton:");
+				displayLCDCenteredString(1, "SKILLS");
+			}
+		} else if (scene == "other") {
+			displayLCDCenteredString(0, "1: NO AUTON");
+			displayLCDCenteredString(1, "2: SKILLS");
+			if (nLCDButtons == 1) {
+				scene = "finished";
+				selectedAutonomousColor = 0;
+				selectedAutonomousSquare = 0;
+				wait1Msec(500);
+			} else if (nLCDButtons == 2) {
+				scene = "finished";
+				skills = true;
+				selectedAutonomousSquare = 3;
+				selectedAutonomousColor = 3;
+			}
+		} else {
+			displayLCDCenteredString(0, "ERROR: Failed");
+			displayLCDCenteredString(1, "to match scenes");
+		}
+		lastScene = scene;
+		
+	}
+
 	stopDrive();
 	resetSensors();
+
+	bLCDBacklight = false;
 
 }
 
