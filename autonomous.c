@@ -1,7 +1,9 @@
+#pragma config(UART_Usage, UART1, uartVEXLCD, baudRate19200, IOPins, None, None)
 #pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
-#pragma config(Sensor, in1,    pot,            sensorPotentiometer)
-#pragma config(Sensor, dgtl5,  encoderright,   sensorQuadEncoder)
-#pragma config(Sensor, dgtl7,  encoderleft,    sensorQuadEncoder)
+#pragma config(Sensor, in1,    pot,            sensorNone)
+#pragma config(Sensor, in2,    gyro,           sensorGyro)
+#pragma config(Sensor, dgtl5,  encoderleft,    sensorQuadEncoder)
+#pragma config(Sensor, dgtl7,  encoderright,   sensorQuadEncoder)
 #pragma config(Motor,  port2,           frontleft,     tmotorVex393_MC29, openLoop, driveLeft)
 #pragma config(Motor,  port3,           frontright,    tmotorVex393_MC29, openLoop, reversed, driveRight)
 #pragma config(Motor,  port4,           backleft,      tmotorVex393_MC29, openLoop, driveLeft)
@@ -18,92 +20,41 @@
 
 #pragma systemFile
 
-void pre_auton() {
-	bStopTasksBetweenModes = true;
-
+void stopDrive() {
 	motor[frontleft] = 0;
 	motor[frontright] = 0;
 	motor[backleft] = 0;
 	motor[backright] = 0;
-	motor[armleft] = 0;
-	motor[armright] = 0;
-	motor[claw] = 0;
-
-	SensorValue[encoderleft] = 0;
-	SensorValue[encoderright] = 0;
-
-}
-int l;
-void moveForward(int clicks, int speed) {
-	SensorValue[encoderleft] = 0;
-	SensorValue[encoderright] = 0;
-	
-	float kp = 0.15;
-	float ki = 0.23;
-	
-	int rightpower = speed;
-	int leftpower;
-	
-	int error = 0;
-	int prevError = 0;
-	int integral = 0;
-	
-	while (SensorValue[encoderright] < clicks) {
-		datalogDataGroupStart();
-		datalogAddValue(1, error);
-		datalogAddValue(2, integral);
-		datalogAddValue(3, derivative);
-		datalogDataGroupEnd();
-		error = SensorValue[encoderright] - abs(SensorValue[encoderleft]);
-		integral += error;
-		
-		leftpower = rightpower + (error * kp) + (integral * ki);
-		motor[frontleft] = leftpower;
-		motor[frontright] = rightpower;
-		motor[backleft] = leftpower;
-		motor[backright] = rightpower;
-		
-		prevError = error;
-		wait1Msec(15);
-		
-		errorValue = error;
-		integralValue = integral;
-		derivativeValue = derivative;
-	}
-	
-	rightpower = 0;
-	leftpower = 0;
 }
 
-void turnRight(int degrees, int speed) {
-	int degrees10 = degrees * 4;
-
+void resetSensors() {
 	SensorValue[encoderleft] = 0;
+	SensorValue[encoderright] = 0;
+	SensorValue[gyro] = 0;
+}
 
-	while (abs(SensorValue[encoderleft]) < degrees10) {
-		motor[frontleft] = speed;
-		motor[backleft] = -speed;
-		motor[frontright] = speed;
-		motor[backright] = -speed;
-	}
-
-	motor[frontleft] = 0;
-	motor[frontright] = 0;
-	motor[backleft] = 0;
-	motor[backright] = 0;
-
+void pause() {
 	wait1Msec(100);
 }
 
-void turnLeft (int degrees, int speed) {
-	int degrees10 = degrees * 4;
+void pre_auton() {
+	bStopTasksBetweenModes = true;
 
+	stopDrive();
+	resetSensors();
+
+}
+
+
+
+void moveForward(float ticks, int speed) {
+	SensorValue[encoderleft] = 0;
 	SensorValue[encoderright] = 0;
 
-	while (abs(SensorValue[encoderright]) < degrees10) {
-		motor[frontleft] = -speed;
+	while (abs(SensorValue[encoderright] / 2 + SensorValue[encoderright] / 2) < ticks) {
+		motor[frontleft] = speed;
 		motor[frontright] = speed;
-		motor[backleft] = -speed;
+		motor[backleft] = speed;
 		motor[backright] = speed;
 	}
 
@@ -112,7 +63,39 @@ void turnLeft (int degrees, int speed) {
 	motor[backleft] = 0;
 	motor[backright] = 0;
 
-	wait1Msec(100);
+	pause();
+}
+
+void turnRight(int degrees, int speed) {
+	int ticks = degrees * 55 / 20;
+
+	SensorValue[encoderright] = 0;
+
+	while (abs(SensorValue[encoderright]) < ticks) {
+		motor[frontleft] = speed;
+		motor[frontright] = -speed;
+		motor[backleft] = speed;
+		motor[backright] = -speed;
+	}
+
+	stopDrive();
+	pause();
+}
+
+void turnLeft (int degrees, int speed) {
+	int ticks = degrees * 51 / 20;
+
+	SensorValue[encoderleft] = 0;
+
+	while (abs(SensorValue[encoderleft]) < ticks) {
+		motor[frontleft] = -speed;
+		motor[frontright] = speed;
+		motor[backleft] = -speed;
+		motor[backright] = speed;
+	}
+
+	stopDrive();
+	pause();
 }
 
 void arm(bool direction, long time) {
@@ -129,18 +112,29 @@ void arm(bool direction, long time) {
 		motor[armleft] = 0;
 		motor[armright] = 0;
 	}
+
+	pause();
 }
 
 void flip(long time) {
 	motor[claw] = 127;
 	wait1Msec(time);
-	motor[claw] =0;
+	motor[claw] = 0;
 }
 
+void shoot() {
+	motor[shooter] = 127;
+	wait1Msec(1400);
+	motor[shooter] = 0;
+}
 
 task autonomous () {
-	moveForward(600, 100);
+	moveForward(1400, -127);
 }
+
+int angle = SensorValue[pot];
+int a = SensorValue[encoderleft];
+int b = SensorValue[encoderright];
 
 task usercontrol() {
 	while (0==0) {
@@ -196,14 +190,13 @@ task usercontrol() {
 		} else {
 			motor[shooter] = 0;
 		}
-		
-		if (vexRT[Btn7U] == 1) {
-			moveForward(900, 90);
-		} else if (vexRT[Btn7D] == 1) {
-			motor[frontleft] = 0;
-			motor[frontright] = 0;
-			motor[backleft] = 0;
-			motor[backright] = 0;
+
+		if (vexRT[Btn7L] == 1 && vexRT[Btn7R] == 0) {
+			turnLeft(90, 60);
+		} else if (vexRT[Btn7R] == 1 && vexRT[Btn7L] == 0) {
+			turnRight(90, 60);
+		} else {
+
 		}
 	}
 }
