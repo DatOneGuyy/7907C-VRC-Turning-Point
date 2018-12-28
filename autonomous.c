@@ -157,7 +157,6 @@ void pre_auton() {
 	resetSensors();
 
 	bLCDBacklight = false;
-
 }
 
 
@@ -227,7 +226,6 @@ void arm(bool direction, long time) {
 		motor[armleft] = 0;
 		motor[armright] = 0;
 	}
-
 	pause();
 }
 
@@ -253,9 +251,6 @@ int b = SensorValue[encoderright];
 
 task usercontrol() {
 	while (0==0) {
-		angle = SensorValue[pot];
-		a = SensorValue[encoderleft];
-		b = SensorValue[encoderright];
 		//Driving with Joysticks
 		motor[frontleft] = vexRT[Ch3];
 		motor[backleft] = vexRT[Ch3];
@@ -305,13 +300,13 @@ task usercontrol() {
 		} else {
 			motor[shooter] = 0;
 		}
-
+    
 		if (vexRT[Btn7L] == 1 && vexRT[Btn7R] == 0) {
 			turnLeft(90, 60);
 		} else if (vexRT[Btn7R] == 1 && vexRT[Btn7L] == 0) {
 			turnRight(90, 60);
 		} else {
-
+    
 		}
 	}
 }
