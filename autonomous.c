@@ -1,6 +1,6 @@
 #pragma config(UART_Usage, UART1, uartVEXLCD, baudRate19200, IOPins, None, None)
 #pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
-#pragma config(Sensor, in1,    pot,            sensorNone)
+#pragma config(Sensor, in1,    pot,            sensorPotentiometer)
 #pragma config(Sensor, in2,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl5,  encoderleft,    sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  encoderright,   sensorQuadEncoder)
@@ -20,8 +20,8 @@
 
 #pragma systemFile
 
-int selectedAutonomousColor; //1 is red, 2 is blue, 0 is none
-int selectedAutonomousSquare; //1 is close, 2 is far, 0 none
+int selectedAutonomousColor = 0; //1 is red, 2 is blue, 0 is none
+int selectedAutonomousSquare = 0; //1 is close, 2 is far, 0 none
 bool skills;
 
 void stopDrive() {
@@ -43,7 +43,7 @@ void clear() {
 }
 
 void pause() {
-	wait1Msec(100);
+	wait1Msec(250);
 }
 
 void pre_auton() {
@@ -160,28 +160,70 @@ void pre_auton() {
 
 }
 
+/*ticks must be positive, speed can be different values*/
 
-
-void moveForward(float ticks, int speed) {
+void moveBackward(float ticks, int speed) {
 	SensorValue[encoderleft] = 0;
 	SensorValue[encoderright] = 0;
 
+	int error = SensorValue[encoderleft] - SensorValue[encoderright];
+	int lastError;
+	int derivative;
+
+	float kp = 3;
+	float kd = 0;
+
+	int leftspeed = speed;
+	int rightspeed = speed;
+
 	while (abs(SensorValue[encoderright] / 2 + SensorValue[encoderright] / 2) < ticks) {
-		motor[frontleft] = speed;
-		motor[frontright] = speed;
-		motor[backleft] = speed;
-		motor[backright] = speed;
+		motor[frontleft] = leftspeed;
+		motor[backleft] = leftspeed;
+		motor[frontright] = rightspeed;
+		motor[backright] = rightspeed;
+
+		lastError = error;
+
+		error = SensorValue[encoderleft] - SensorValue[encoderright];
+
+		derivative = error - lastError;
+
+		rightspeed = speed + (error * kp) + (derivative * kd);
+
+		datalogDataGroupStart();
+		datalogAddValue(0, error);
+		datalogAddValue(1, rightspeed);
+		datalogDataGroupEnd();
+
 	}
 
-	motor[frontleft] = 0;
-	motor[frontright] = 0;
-	motor[backleft] = 0;
-	motor[backright] = 0;
+	stopDrive();
 
 	pause();
 }
 
+void moveForward(int ticks, int speed) {
+	resetSensors();
+
+	int error;
+	int kp = 0;
+
+	int leftpower = speed;
+	int rightpower = leftpower;
+
+	while (SensorValue[encoderleft] < ticks) {
+		error = SensorValue[encoderleft] - SensorValue[encoderright];
+		rightpower = leftpower + (kp * error);
+		motor[frontright] = rightpower;
+		motor[backright] = rightpower;
+		motor[backleft] = leftpower;
+		motor[frontleft] = leftpower;
+	}
+	stopDrive();
+}
+
 void turnRight(int degrees, int speed) {
+	/*
 	int ticks = degrees * 51 / 20;
 
 	SensorValue[encoderright] = 0;
@@ -194,38 +236,88 @@ void turnRight(int degrees, int speed) {
 	}
 
 	stopDrive();
-	pause();
-}
+	pause();*/
+	resetSensors();
+	int degrees10 = degrees * 9.4;
+	int error = 5;
 
-void turnLeft (int degrees, int speed) {
-	int ticks = degrees * 5 / 2;
+	while (abs(SensorValue[gyro]) < degrees10 - 100) {
+		motor[frontright] = -speed;
+		motor[frontleft] = speed;
+		motor[backright] = -speed;
+		motor[backleft] = speed;
+	}
 
-	SensorValue[encoderleft] = 0;
+	motor[frontright] = 5;
+	motor[frontleft] = -5;
+	motor[backright] = 5;
+	motor[backleft] = -5;
 
-	while (abs(SensorValue[encoderleft]) < ticks) {
-		motor[frontleft] = -speed;
-		motor[frontright] = speed;
-		motor[backleft] = -speed;
-		motor[backright] = speed;
+	wait1Msec(50);
+
+	while (abs(SensorValue[gyro]) < degrees10 - error) {
+		motor[frontright] = speed * -0.6;
+		motor[frontleft] = speed * 0.6;
+		motor[backleft] = speed * 0.6;
+		motor[backright] = speed * -0.6;
 	}
 
 	stopDrive();
 	pause();
 }
 
-void arm(bool direction, long time) {
-	if (!direction) {
-		motor[armleft] = 63;
-		motor[armright] = 63;
-		wait1Msec(time);
-		motor[armleft] = 0;
-		motor[armright] = 0;
-	} else {
-		motor[armleft] = -63;
-		motor[armright] = -63;
-		wait1Msec(time);
-		motor[armleft] = 0;
-		motor[armright] = 0;
+void turnLeft (int degrees, int speed) {
+	/*
+	SensorValue[gyro] = 0;
+	while (abs(SensorValue[gyro]) < degrees * 10) {
+		motor[frontleft] = -speed;
+		motor[backleft] = -speed;
+		motor[frontright] = speed;
+		motor[backright] = speed;
+	}
+
+	stopDrive();
+	pause();*/
+	resetSensors();
+	int degrees10 = degrees * 9.4;
+	int error = 5;
+
+	while (abs(SensorValue[gyro]) < degrees10 - 100) {
+		motor[frontright] = speed;
+		motor[frontleft] = -speed;
+		motor[backright] = speed;
+		motor[backleft] = -speed;
+	}
+
+	motor[frontright] = -5;
+	motor[frontleft] = 5;
+	motor[backright] = -5;
+	motor[backleft] = 5;
+
+	wait1Msec(50);
+
+	while (abs(SensorValue[gyro]) < degrees10 - error) {
+		motor[frontright] = speed * 0.6;
+		motor[frontleft] = speed * -0.6;
+		motor[backleft] = speed * -0.6;
+		motor[backright] = speed * 0.6;
+	}
+
+	stopDrive();
+	pause();
+}
+
+void arm(int ticks, long time) {
+	if (SensorValue[pot] > ticks) {
+		while (SensorValue[pot] > ticks) {
+			motor[armleft] = 63;
+			motor[armright] = 63;
+		}
+	} else if (SensorValue[pot] < ticks) {
+		while (SensorValue[pot] < ticks) {
+			motor[armleft] = -63;
+			motor[armright] = -63;
+		}
 	}
 
 	pause();
@@ -243,19 +335,23 @@ void shoot() {
 	motor[shooter] = 0;
 }
 
-task autonomous () {
-	moveForward(1400, -127);
-}
+/*
+Autonomous information:
+Turning: (90, 50)
+Movement: 466 per square
+Shooting: 2nd or 4th square
+*/
 
-int angle = SensorValue[pot];
-int a = SensorValue[encoderleft];
-int b = SensorValue[encoderright];
+task autonomous () {
+	//shoot();
+	moveBackward(1400, -127);
+	moveForward(466, 127);
+	turnLeft(90, 50);
+	moveForward(600, 127);
+}
 
 task usercontrol() {
 	while (0==0) {
-		angle = SensorValue[pot];
-		a = SensorValue[encoderleft];
-		b = SensorValue[encoderright];
 		//Driving with Joysticks
 		motor[frontleft] = vexRT[Ch3];
 		motor[backleft] = vexRT[Ch3];
