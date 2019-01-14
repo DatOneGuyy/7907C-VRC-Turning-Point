@@ -230,20 +230,6 @@ void moveForward(int ticks, int speed) {
 }
 
 void turnRight(int degrees, int speed) {
-	/*
-	int ticks = degrees * 51 / 20;
-
-	SensorValue[encoderright] = 0;
-
-	while (abs(SensorValue[encoderright]) < ticks) {
-		motor[frontleft] = speed;
-		motor[frontright] = -speed;
-		motor[backleft] = speed;
-		motor[backright] = -speed;
-	}
-
-	stopDrive();
-	;*/
 
 	setGyro();
 
@@ -276,17 +262,6 @@ void turnRight(int degrees, int speed) {
 }
 
 void turnLeft (int degrees, int speed) {
-	/*
-	SensorValue[gyro] = 0;
-	while (abs(SensorValue[gyro]) < degrees * 10) {
-		motor[frontleft] = -speed;
-		motor[backleft] = -speed;
-		motor[frontright] = speed;
-		motor[backright] = speed;
-	}
-
-	stopDrive();
-	;*/
 
 	setGyro();
 
@@ -347,7 +322,7 @@ void shoot() {
 /*
 Autonomous information:
 Turning: (85, 50)*
-Movement: 466 per square approx. 1 - 1 + 1 * 1 / 1 sin(tan^-1())
+Movement: 466 per square approx.
 Shooting: 2nd or 4th square
 
 */
