@@ -11,4 +11,7 @@ Robot: 2 towers, with 2 motors carrying arm (potentiometer included)*
 Sensors/Output: Potentiometer on arm
          2 optical shaft encoders on back wheels
          LCD display
+         2 Gyro sensors
+         
+Preparing for California State Championships 
 
