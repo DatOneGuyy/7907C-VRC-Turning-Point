@@ -301,12 +301,12 @@ void arm(int ticks) { //moves arm based on arm potentiometer value, not limited 
 		}
 	}
 	motor[armmotor] = 0; //stops arm
-	;
+	
 }
 
 void shoot() {
 	motor[shooter] = -127;
-	wait1Msec(1400);
+	wait1Msec(1200);
 	motor[shooter] = 0; //shoots catapult
 }
 
@@ -382,26 +382,26 @@ void red_non_flag() {
 void blue_flag() {
 	setGyro();
 	//blue flag side autonomous: shoots middle flag, flips cap, then alliance parks
-	motor[spintake] = -127;
-	moveBackward(600, -80);
-	wait1Msec(500);
-	motor[spintake] = 0;
-	moveBackward(560, 80);
-	turnLeft(75, 55);
-	shoot();
 	motor[spintake] = -80;
-	arm(1800);
-	moveBackward(400, 80);
-	moveBackward(50, -80);
+	moveBackward(480, -60);
+	wait1Msec(500);
+	moveBackward(490, 80);
+	motor[spintake] = 0;
+	turnLeft(70, 80);
+	arm(560);
+	moveBackward(265, 80);
+	moveBackward(40, -70);
+	motor[leftdrive] = 0;
+	motor[rightdrive] = 0;
+	arm(1200);
+	shoot();
+	motor[spintake] = -90;
+	moveBackward(360, -80);
 	motor[rightdrive] = 0;
 	motor[leftdrive] = 0;
-	wait1Msec(200);
-	arm(2300);
-	wait1Msec(200);
+	wait1Msec(900);
 	shoot();
 	motor[spintake] = 0;
-	moveBackward(200, -80);
-	turnRight(80, 50);
 	//IN PROGRESS: improve reliability to above 80%
 }
 
