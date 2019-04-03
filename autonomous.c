@@ -21,6 +21,12 @@ Nuin - Intake
 pinot - Cap
 */
 
+/*
+Front red - 8.2V
+Front blue - 8.3V
+Back red -8.0V
+Back blue - 8.0V
+*/
 #pragma platform(VEX2)
 #pragma competitionControl(Competition) //competition configuration
 #include "Vex_Competition_Includes.c"
@@ -28,7 +34,7 @@ pinot - Cap
 #pragma systemFile
 
 int selectedAutonomousColor = 2; //1 is red, 2 is blue, 0 is none
-int selectedAutonomousSquare = 1; //1 is close, 2 is far, 0 none
+int selectedAutonomousSquare = 2; //1 is close, 2 is far, 0 none
 
 /*
 LCD INSTRUCTIONS
@@ -301,12 +307,12 @@ void arm(int ticks) { //moves arm based on arm potentiometer value, not limited 
 		}
 	}
 	motor[armmotor] = 0; //stops arm
-	
+
 }
 
 void shoot() {
 	motor[shooter] = -127;
-	wait1Msec(1200);
+	wait1Msec(1400);
 	motor[shooter] = 0; //shoots catapult
 }
 
@@ -361,19 +367,72 @@ void skills() {
 }
 
 void red_flag() {
-	moveBackward(500, -127);
+	setGyro();
+	motor[spintake] = -80;
+	moveBackward(560, -80);
+	motor[rightdrive] = 0;
+	motor[leftdrive] = 0;
+	wait1Msec(500);
+	moveBackward(230, 127);
+	motor[spintake] = 0;
+	turnRight(190, 70);
+	motor[leftdrive] = -70;
+	motor[rightdrive] = -70;
+	wait1Msec(2800);
+	motor[leftdrive] = 0;
+	motor[rightdrive] = 0;
+	motor[spintake] = 0;
+	setGyro();
+	moveBackward(50, 127);
+	turnLeft(62, 70);
+	motor[leftdrive] = 0;
+	motor[rightdrive] = 0;
+	arm(750);
+	moveBackward(320, 80);
+	moveBackward(45, -70);
+	motor[leftdrive] = 0;
+	motor[rightdrive] = 0;
+	arm(1500);
 	shoot();
-	moveBackward(400, -127);
+	motor[spintake] = -100; //*jbjibbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdcvcknenenenenenenenennenwnewnenwenwenwneenwnenwenwnewnenwnenwenwnewnneenneenneenenenenennenewnenweenewnenennenenenenewnenwenenwnewnenewnwenewnwnnewnewnewnenenenwnenwnewnwenwenwnewennweewnewnwnnwnewnewnwenewnwenwewennewwneenwewnwenewnwenwenwnewenwnewennewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwnewnennwenewnwenwenewnwennewnwenewnnwenwenwenwenenwnnwnenwenwennwenwnenenenenennnewwwwwwwwwwwwwwwwwenennenewnewnnwenwnenenenwnenenwnenwenewnwenwnenwenwnewnenwneenwnewnewnwenwenennwennewneneenenenwnenwneewnnewnwenwenewnnwenwennewnewnwenenwnnenwenwennwenwenwnewnenewnwenwenewnenwewnwnewnenwenwneewnwenenwnewnwnewnwnenewwenewnwenwnewenewnwneenewnnenweneneneenwnewnenenwenwenwenwenweewnewnwenenewnwenwnewenwenewnnewnwenwewenwnenewnennweewnnewnwenenenwnenennennwenwnewennewnwenwenwenwennwenwenwennwenwenwenewnwenwennwenwenwennwenwenennenewnwenwenenewnenwenwenwenenwenenewnwenwennwenenwenwnewnnewnewnwenwenewnwenenwnenewnewnwenewnewnwenewnewnnewnewnewnwenwnenewnwenwenwenwenwennwennewnewnwennwenwenwnwewennenwenwenenewnenenwennenw`enwenenwenwnenewnwenenwenwennwenewnwenwennewnewnwennwenewnewnnewnwenwenwenewnewnwenwenwenwenewnwnenwenenenwnenwnewnennwenwennewnwenenneneneeeeeeeeenenwnenwnewnwenewnewnennwenewnwenewnewnnewnwenewnnwenwenewnwennwenewnwenwenwnenenenwnenwnenwnenwnenwnenwenwnen wnenwenwnenwenenwenewnnwenwenwenewnnwenwenwenwnenenewnnenewnwennewnewnennenewnnewnwennwennewnenneenwewnwenwennwenwenwnen2ewnenewnewnnewnwennewnbwennnwenwnnennwenwenenwnwwnnenewnwnwennnwenewnwn enwenewn wenwennwenewnwennwenenewnwenwnenbwenwennwenewnwnenwnwennwnewnwnennwenwennwenwenwennewnwennenwnewnennenewnwenewnenenennenennenwnenwenenwnewennenenennnenenenennenenenennenewnewnwenwjnenwnenw newnenwnewnenwnenwnenwnewnenwnenwnenwenwnenwenwnenwnennwewnewnenwennnenewnennewwnenwnwennwnenwenenwnennwenweennwenwenewnnenwenwenewnwewneewnwneenwnewnenwnewnewnenwennenenweenneneennwnednenwnenenenewnenwennenwnewnwnnenneennenenwnnewnewnnnnnnwnenwenen
+	moveBackward(355, -80);
+	motor[rightdrive] = 0;
+	motor[leftdrive] = 0;
+	wait1Msec(1600);
+	shoot();
+	motor[spintake] = 0;
 //red flag side autonomous: shoots middle flag, toggles low flag, flips cap, then alliance parks
 
 //IN PROGRESS: improve reliability to above 70%
 }
 
 void red_non_flag() {
-	moveBackward(300, -127);
-	turnLeft(40, 50);
-	moveBackward(100, -127);
-
+   setGyro();
+   moveBackward(20, -95);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
+   arm(750);
+   turnRight(114,55);
+   moveBackward(46, -80);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
+   arm(1300);
+   shoot();
+   arm(550);
+   turnRight(164,90);
+   moveBackward (485, 120);
+   moveBackward (90,-90);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
+   setGyro();
+   turnLeft(80,80);
+   motor[leftdrive]=-127;
+   motor[rightdrive]=-127;
+   wait1Msec(1300);
+   arm(550);
+   moveBackward(950,127);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
 	//red far side autonomous: flips cap
 
 	//IN PROGRESS: shoot ball
@@ -381,35 +440,70 @@ void red_non_flag() {
 
 void blue_flag() {
 	setGyro();
-	//blue flag side autonomous: shoots middle flag, flips cap, then alliance parks
 	motor[spintake] = -80;
-	moveBackward(480, -60);
+	moveBackward(560, -80);
+	motor[rightdrive] = 0;
+	motor[leftdrive] = 0;
 	wait1Msec(500);
-	moveBackward(490, 80);
+	moveBackward(230, 127);
 	motor[spintake] = 0;
-	turnLeft(70, 80);
-	arm(560);
-	moveBackward(265, 80);
-	moveBackward(40, -70);
+	turnLeft(190, 70);
+	motor[leftdrive] = -70;
+	motor[rightdrive] = -70;
+	wait1Msec(2800);
 	motor[leftdrive] = 0;
 	motor[rightdrive] = 0;
-	arm(1200);
+	motor[spintake] = 0;
+	setGyro();
+	moveBackward(60, 127);
+	turnRight(62, 70);
+	motor[leftdrive] = 0;
+	motor[rightdrive] = 0;
+	arm(750);
+	moveBackward(320, 80);
+	moveBackward(45, -70);
+	motor[leftdrive] = 0;
+	motor[rightdrive] = 0;
+	arm(1500);
 	shoot();
-	motor[spintake] = -90;
-	moveBackward(360, -80);
+	motor[spintake] = -100;
+	moveBackward(355, -80);
 	motor[rightdrive] = 0;
 	motor[leftdrive] = 0;
-	wait1Msec(900);
+	wait1Msec(1600);
 	shoot();
 	motor[spintake] = 0;
 	//IN PROGRESS: improve reliability to above 80%
 }
 
 void blue_non_flag() {
-	shoot();
-	moveBackward(300, -127);
-	turnLeft(60, 50);
-	moveBackward(650, -127);
+	setGyro();
+   moveBackward(20, -95);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
+   arm(750);
+   turnLeft(114,57);
+   moveBackward(45, -80);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
+   arm(1300);
+   shoot();
+   arm(550);
+   turnLeft(170,90);
+   moveBackward (420,100);
+   moveBackward (15,-70);
+   arm(550);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
+   setGyro();
+   turnRight(80,80);
+   motor[leftdrive]=-127;
+   motor[rightdrive]=-127;
+   wait1Msec(1300);
+   arm(550);
+   moveBackward(950,127);
+   motor[leftdrive] = 0;
+   motor[rightdrive] = 0;
 	//blue far side autonomous: flips cap and shoots ball
 
 }
@@ -469,9 +563,9 @@ task usercontrol() { //driver control
 				k = false;
 			}
 			if (vexRT[Btn5U] == 1 && vexRT[Btn5D] == 0) { //claw is controlled by 5U and 5D
-				motor[claw] = 55;
+				motor[claw] = 55
 			} else if (vexRT[Btn5D] == 1 && vexRT[Btn5U] == 0) {
-				motor[claw] = -55;
+				motor[claw] = -55
 			} else {
 				motor[claw] = 0;
 			}
@@ -493,9 +587,9 @@ task usercontrol() { //driver control
 			motor[leftdrive] = vexRT[Ch3Xmtr2];
 			motor[rightdrive] = vexRT[Ch2Xmtr2];
 			if (vexRT[Btn8UXmtr2] == 1 && vexRT[Btn8DXmtr2] == 0) { //claw is controlled by 5U and 5D
-				motor[armmotor] = 55;
+				motor[armmotor] = -127;
 			} else if (vexRT[Btn8DXmtr2] == 1 && vexRT[Btn8UXmtr2] == 0) {
-				motor[armmotor] = -55;
+				motor[armmotor] = 127;
 			} else {
 				motor[armmotor] = 0;
 			}
@@ -514,9 +608,9 @@ task usercontrol() { //driver control
 				motor[shooter] = 0;
 			}
 			if (vexRT[Btn6UXmtr2] == 1 && vexRT[Btn6DXmtr2] == 0) {
-				motor[spintake] = 127;
+				motor[spintake] = 90
 			} else if (vexRT[Btn6UXmtr2] == 0 && vexRT[Btn6DXmtr2] == 1) {
-				motor[spintake] = -127;
+				motor[spintake] = -90
 			} else {
 				motor[spintake] = 0;
 			}
@@ -529,7 +623,7 @@ task usercontrol() { //driver control
 
 
 
-		if (vexRT[Btn8L] == 1) {
+		if (vexRT[Btn5U] == 1 && vexRT[Btn5D] == 1 && vexRT[Btn6U] == 1 && vexRT[Btn6D] == 1) {
 			user = "Daniel";
 		}
 		if (vexRT[Btn5UXmtr2] == 1 && vexRT[Btn5DXmtr2] == 1 && vexRT[Btn6UXmtr2] == 1 && vexRT[Btn6DXmtr2] == 1) {
