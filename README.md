@@ -12,6 +12,4 @@ Sensors/Output: Potentiometer on arm
          2 optical shaft encoders on back wheels
          LCD display
          2 Gyro sensors
-         
-Preparing for California State Championships 
-
+       
